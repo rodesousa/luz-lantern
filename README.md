@@ -10,7 +10,7 @@
 - ln -rs github.com $GOPATH/src/
 - cd $GOPATH/src/github.com/rodesousa/lantern
 - go install .
-- $GOPATH/bin/lantern
+- $GOPATH/bin/lantern `file`
 
 ### luz with vim
 
