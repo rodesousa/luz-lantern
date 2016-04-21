@@ -1,25 +1,26 @@
 package main
 
 import (
-	"fmt"
+	//	"fmt"
 	//"github.com/rodesousa/lantern/controller"
 	//"github.com/rodesousa/lantern/shard"
-	"io/ioutil"
+	"github.com/rodesousa/lantern/engine"
+	//	"gopkg.in/yaml.v2"
+	//"io/ioutil"
+	//"log"
 	"os"
 )
 
 func main() {
-	file := os.Args[1:]
-	dat, err := ioutil.ReadFile(file[0])
 
-	if err != nil {
-		fmt.Println("Cannot read the file")
+	if len(os.Args) != 2 {
+		fmt.Println("Il faut que 2 arguments !")
 		os.Exit(1)
 	}
+	engine.MapYamlToShard(os.Args[1])
 
 	//var u = shard.InitUser()
-	//fmt.Println(controller.Test())
-	//fmt.Println(u.Cmd())
-
-	fmt.Println(string(dat))
+	//for key, value := range m {
+	//	fmt.Println("Key:", key, "Value:", value)
+	//}
 }

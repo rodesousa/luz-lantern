@@ -1,4 +1,8 @@
 ---
 
-- user:
-    name: root
+cmd:
+    - user:
+        name: aze
+
+    - user:
+        name: lala
