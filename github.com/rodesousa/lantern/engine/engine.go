@@ -3,6 +3,7 @@ package engine
 
 import (
 	"fmt"
+	"github.com/rodesousa/lantern/shard"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
@@ -23,7 +24,7 @@ func (engine Engine) Run() bool {
 
 func MapYamlToShard(filename string) {
 	data, er := ioutil.ReadFile(filename)
-	mapYaml := make(map[string][]map[string]interface{})
+	mapYaml := make(map[string][]map[string]map[interface{}]interface{})
 
 	if er != nil {
 		fmt.Println("Cannot read the file")
@@ -34,5 +35,16 @@ func MapYamlToShard(filename string) {
 
 	if err != nil {
 		fmt.Println("error: %v", err)
+	}
+
+	value := mapYaml["cmd"][0]
+
+	for k, v := range value {
+		if k == "user" {
+			shard := shard.InitUser()
+			for k2, v2 := range v {
+				shard.Args[k2.(string)] = []string{v2.(string)}
+			}
+		}
 	}
 }

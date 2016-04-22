@@ -6,7 +6,7 @@ import (
 )
 
 func InitUser() User {
-	return User{Shard{"user", "id"}}
+	return User{Shard{"user", "id", make(map[string][]string)}}
 }
 
 func (cmd Shard) Cmd() bool {

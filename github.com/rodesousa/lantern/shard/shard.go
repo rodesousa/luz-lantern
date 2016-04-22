@@ -1,8 +1,11 @@
 package shard
 
+type arg_type map[string][]string
+
 type Shard struct {
-	name     string
-	cmd_line string
+	Name     string
+	Cmd_line string
+	Args     arg_type
 }
 
 type Cmd interface {

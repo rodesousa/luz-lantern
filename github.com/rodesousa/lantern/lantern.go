@@ -1,7 +1,7 @@
 package main
 
 import (
-	//	"fmt"
+	"fmt"
 	//"github.com/rodesousa/lantern/controller"
 	//"github.com/rodesousa/lantern/shard"
 	"github.com/rodesousa/lantern/engine"
@@ -18,9 +18,4 @@ func main() {
 		os.Exit(1)
 	}
 	engine.MapYamlToShard(os.Args[1])
-
-	//var u = shard.InitUser()
-	//for key, value := range m {
-	//	fmt.Println("Key:", key, "Value:", value)
-	//}
 }
