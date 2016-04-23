@@ -5,12 +5,28 @@
 
 ### Install
 
-- git clone https://github.com/rodesousa/luz-lantern.git 
-- cd luz-lantern
-- ln -rs github.com $GOPATH/src/
-- cd $GOPATH/src/github.com/rodesousa/lantern
-- go install .
-- $GOPATH/bin/lantern `file`
+Download source :
+```bash
+git clone https://github.com/rodesousa/luz-lantern.git
+```
+Configure $GOPATH env :
+```bash 
+cd luz-lantern
+ln -rs github.com $GOPATH/src/
+```
+Install dependencies :
+```bash
+go get -v github.com/spf13/cobra/cobra
+```
+Build the program :
+```bash
+cd $GOPATH/src/github.com/rodesousa/lantern
+go install .
+```
+Enjoy !
+```bash
+$GOPATH/bin/lantern run `yaml__file`
+```
 
 ### luz with vim
 
