@@ -50,6 +50,7 @@ func MapYamlToShard(filename string) {
 
 func analyseShard(in interface{}){
 	local := in.([]interface{})
+	shardUser := shard.InitUser()
 	// At this level, we are in the sub - cmd hierarchy
 	for i := range local {
 		// convert the subShard for analysis
@@ -60,13 +61,17 @@ func analyseShard(in interface{}){
 			if k == "user" {
 				name, error := extractString(v, "name")
 				if(error == nil) {
-					fmt.Println("Find a user Shard, extracted name : ", name)
+					//fmt.Println("Find a user Shard, extracted name : ", name)
+					shardUser.ArgsL.PushBack(name)
 				} else {
 					fmt.Println(error.Error())
 				}
 			}
 		}
 	}
+	//fmt.Println(shardUser)
+	// Launch test on users
+	shardUser.Cmd()
 }
 
 func extractString(in interface {}, key string) (string, error){

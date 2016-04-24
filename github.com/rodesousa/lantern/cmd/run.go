@@ -33,7 +33,9 @@ var runCmd = &cobra.Command{
 
 }
 
+// Main funtion, launch when run command is invoked
 func runLuz(cmd *cobra.Command, args []string) {
+	// waiting for 1 arg -> show help in this case
 	if len(args) == 0 {
 		fmt.Println(cmd.Help())
 		os.Exit(1)
