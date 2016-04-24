@@ -6,3 +6,6 @@ cmd:
 
     - user:
         name: lala
+
+    - user:
+        name : ippon
