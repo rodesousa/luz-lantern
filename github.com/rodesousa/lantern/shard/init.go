@@ -7,6 +7,7 @@ import (
 	"runtime"
 	"os/exec"
 	"strings"
+	"github.com/rodesousa/lantern/logger"
 )
 
 func InitUser() User {
@@ -23,7 +24,7 @@ func (cmd Shard) Cmd() bool {
 }
 
 func (cmd User) Cmd() bool {
-	fmt.Println("Testing user")
+	logger.Debug("Testing user")
 	b := true
 	if (cmd.ArgsL.Len() != 0) {
 		for e := cmd.ArgsL.Front(); e != nil; e = e.Next() {
@@ -36,7 +37,7 @@ func (cmd User) Cmd() bool {
 }
 
 func exe_cmd(cmd string, arg string) bool {
-	fmt.Println(cmd)
+	//fmt.Println(cmd)
 	parts := strings.Fields(cmd)
 	size := len(parts)
 	var cmdTocall string
@@ -53,11 +54,10 @@ func exe_cmd(cmd string, arg string) bool {
 
 	out, err := exec.Command(cmdTocall, args, arg).Output()
 	if err != nil {
-		fmt.Println("error occured for command : ", cmd, arg)
-		//fmt.Printf("%s", err)
+		logger.Error("Error occured while testing command", logger.Fields{"cmd" : cmd, "str_arg" : arg})
 		return false
 	}
-	fmt.Printf("%s", out)
-	fmt.Println()
+	logger.InfoWithFields("Command ok", logger.Fields{"cmd" : cmd, "str_arg" : arg, "str_out" : logger.ByteToString(out)})
+
 	return true
 }

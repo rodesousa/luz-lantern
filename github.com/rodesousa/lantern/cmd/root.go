@@ -20,9 +20,11 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/rodesousa/lantern/logger"
 )
 
 var cfgFile string
+var debug bool
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -45,8 +47,8 @@ Copyright © 2016
 Roberto De Sousa (https://github.com/rodesousa)
 Patrick Tavares (https://github.com/ptavares)
 `,
-// Uncomment the following line if your bare application
-// has an action associated with it:
+	// Uncomment the following line if your bare application
+	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
 
 }
@@ -61,18 +63,23 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
-
+	cobra.OnInitialize(initFromCL)
 	// Here you will define your flags and configuration settings.
 	// Cobra supports Persistent Flags, which, if defined here,
 	// will be global for your application.
 
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.luz-lantern.yaml)")
+	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "show debug message")
 }
 
 // initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" { // enable ability to specify config file via flag
+func initFromCL() {
+
+	// initialize debug level
+	logger.Init(debug)
+
+	if cfgFile != "" {
+		// enable ability to specify config file via flag
 		viper.SetConfigFile(cfgFile)
 	}
 

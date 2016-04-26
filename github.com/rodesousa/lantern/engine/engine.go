@@ -6,8 +6,8 @@ import (
 	"github.com/rodesousa/lantern/shard"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"os"
-	//"reflect"
+//"reflect"
+	"github.com/rodesousa/lantern/logger"
 )
 
 type Engine struct {
@@ -27,20 +27,18 @@ func MapYamlToShard(filename string) {
 	data, er := ioutil.ReadFile(filename)
 	// In case of error
 	if er != nil {
-		fmt.Println("Cannot read the file")
-		os.Exit(1)
+		logger.Fatal("Cannot read the file", logger.Fields{"errors" : er})
 	}
 	// the Map for yaml unmarshalling
-	mapYaml :=  make (map[string]interface{})
+	mapYaml := make(map[string]interface{})
 	// unmarshall
 	err := yaml.Unmarshal([]byte(data), &mapYaml)
 	// In case of error
 	if err != nil {
-		fmt.Println("error: %v", err)
-		os.Exit(1)
+		logger.Fatal("Error unmarshalling yaml file", logger.Fields{"errors" : err})
 	}
 	// Launch the analysis
-	for k,v := range mapYaml {
+	for k, v := range mapYaml {
 		// if it's a cmd, analyse the shards
 		if k == "cmd" {
 			analyseShard(v)
@@ -48,7 +46,7 @@ func MapYamlToShard(filename string) {
 	}
 }
 
-func analyseShard(in interface{}){
+func analyseShard(in interface{}) {
 	local := in.([]interface{})
 	shardUser := shard.InitUser()
 	// At this level, we are in the sub - cmd hierarchy
@@ -60,11 +58,11 @@ func analyseShard(in interface{}){
 			// Case user
 			if k == "user" {
 				name, error := extractString(v, "name")
-				if(error == nil) {
-					//fmt.Println("Find a user Shard, extracted name : ", name)
+				if (error == nil) {
 					shardUser.ArgsL.PushBack(name)
 				} else {
-					fmt.Println(error.Error())
+					logger.Error("Error extractString", logger.Fields{"errors" : error})
+					//fmt.Println(error.Error())
 				}
 			}
 		}
@@ -74,10 +72,10 @@ func analyseShard(in interface{}){
 	shardUser.Cmd()
 }
 
-func extractString(in interface {}, key string) (string, error){
+func extractString(in interface{}, key string) (string, error) {
 	switch v := in.(type) {
-	case map[interface {}]interface {} :
-		for k,v := range v {
+	case map[interface{}]interface{} :
+		for k, v := range v {
 			if (k == key) {
 				return v.(string), nil
 			}
@@ -85,35 +83,5 @@ func extractString(in interface {}, key string) (string, error){
 		return "", fmt.Errorf("Unable to find %#v in %#v", key, in)
 	default:
 		return "", fmt.Errorf("Unable to Cast %#v to string", in)
-	}
-}
-
-func MapYamlToShard2(filename string) {
-	data, er := ioutil.ReadFile(filename)
-	mapYaml := make(map[string][]map[string]map[interface{}]interface{})
-
-	if er != nil {
-		fmt.Println("Cannot read the file")
-		os.Exit(1)
-	}
-
-	err := yaml.Unmarshal([]byte(data), &mapYaml)
-
-	if err != nil {
-		fmt.Println("error: %v", err)
-	}
-
-	value := mapYaml["cmd"][0]
-
-	for k, v := range value {
-		fmt.Println("-----> key "+k)
-		if k == "user" {
-			shard := shard.InitUser()
-			for k2, v2 := range v {
-				shard.Args[k2.(string)] = []string{v2.(string)}
-				fmt.Println(shard.Args)
-
-			}
-		}
 	}
 }
