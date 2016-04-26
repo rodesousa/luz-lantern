@@ -18,6 +18,11 @@ Install dependencies :
 ```bash
 go get -v github.com/spf13/cobra/cobra
 ```
+Download and add logrus to your $GOPATH
+```bash
+cd $GOPATH/src/github.com
+git clone https://github.com/Sirupsen/logrus.git
+```
 Build the program :
 ```bash
 cd $GOPATH/src/github.com/rodesousa/lantern
