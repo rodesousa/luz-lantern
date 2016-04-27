@@ -1,0 +1,11 @@
+---
+
+cmd:
+    - user:
+        name: aze
+
+    - user:
+        name: lala
+
+    - user:
+        name : ippon
