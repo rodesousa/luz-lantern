@@ -7,7 +7,7 @@ import (
 	"github.com/rodesousa/lantern/shard"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"reflect"
+	//"reflect"
 )
 
 type Engine struct {
@@ -64,7 +64,7 @@ func analyseShard(in []map[string]shard.Arg_type) {
 				}
 
 				//
-				// en map[string]interface{}
+				// en shard.Arg_type
 				//
 				shardUser.Args = v
 			}

@@ -1,4 +1,4 @@
-// Package main provides ...
+// age main provides ...
 package shard
 
 import (
@@ -26,6 +26,9 @@ func (cmd Shard) Cmd() bool {
 func (cmd User) Cmd() bool {
 	logger.Debug("Testing user")
 	b := true
+	//
+	// list.List
+	//
 	if cmd.ArgsL.Len() != 0 {
 		for e := cmd.ArgsL.Front(); e != nil; e = e.Next() {
 			if !exe_cmd(cmd.Cmd_line, e.Value.(string)) {
@@ -33,11 +36,21 @@ func (cmd User) Cmd() bool {
 			}
 		}
 	}
+	//
+	// en shard.Arg_type
+	//
+	out, err := exec.Command(cmd.Cmd_line, cmd.Args["name"].(string)).Output()
+
+	if err != nil {
+		logger.Error("Error occured while testing command", logger.Fields{"cmd": cmd.Cmd_line, "str_arg": cmd.Args["name"].(string)})
+		return false
+	}
+	logger.InfoWithFields("Command ok", logger.Fields{"cmd": cmd.Cmd_line, "str_arg": cmd.Args["name"].(string), "str_out": logger.ByteToString(out)})
+
 	return b
 }
 
 func exe_cmd(cmd string, arg string) bool {
-	//fmt.Println(cmd)
 	parts := strings.Fields(cmd)
 	size := len(parts)
 	var cmdTocall string
