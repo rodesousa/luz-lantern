@@ -1,11 +1,10 @@
 package logger
 
 import (
-	log "github.com/Sirupsen/logrus"
+	log "github.com/logrus"
 	"io"
 	"os"
 )
-
 
 // Args type to log
 type Fields map[string]interface{}
@@ -59,5 +58,5 @@ func ByteToString(c []byte) string {
 		}
 		n = i
 	}
-	return string(c[:n + 1])
+	return string(c[:n+1])
 }
