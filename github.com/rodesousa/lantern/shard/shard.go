@@ -2,12 +2,12 @@ package shard
 
 import "container/list"
 
-type arg_type map[string][]string
+type Arg_type map[string]interface{}
 
 type Shard struct {
 	Name     string
 	Cmd_line string
-	Args     arg_type
+	Args     Arg_type
 	ArgsL    *list.List
 }
 

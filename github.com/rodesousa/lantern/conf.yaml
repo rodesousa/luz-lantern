@@ -9,3 +9,6 @@ cmd:
 
     - user:
         name : ippon
+
+    - user:
+        name : root

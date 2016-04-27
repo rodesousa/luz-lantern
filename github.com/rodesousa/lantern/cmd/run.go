@@ -15,19 +15,19 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"os"
 	"github.com/rodesousa/lantern/engine"
 	log "github.com/rodesousa/lantern/logger"
+	"github.com/spf13/cobra"
+	"os"
 )
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
-	Use:   "run [yaml_file]",
-	Short: "launch the lantern program",
-	Long: `launch the lanter program with a yaml file that discribe all test to do`,
-	Example : "lantern run tests.yaml",
-	Run: runLuz,
+	Use:     "run [yaml_file]",
+	Short:   "launch the lantern program",
+	Long:    `launch the lanter program with a yaml file that discribe all test to do`,
+	Example: "lantern run tests.yaml",
+	Run:     runLuz,
 }
 
 // Main funtion, launch when run command is invoked
@@ -39,12 +39,13 @@ func runLuz(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	} else {
 		log.Info("Starting lantern with run command")
-		log.DebugWithFields("run called", log.Fields{"args" : args})
+		log.DebugWithFields("run called", log.Fields{"args": args})
 		engine.MapYamlToShard(args[0])
 
 	}
 	log.Info("End lantern")
 }
+
 func init() {
 	RootCmd.AddCommand(runCmd)
 	// Here you will define your flags and configuration settings.

@@ -3,11 +3,11 @@ package engine
 
 import (
 	"fmt"
+	"github.com/rodesousa/lantern/logger"
 	"github.com/rodesousa/lantern/shard"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-//"reflect"
-	"github.com/rodesousa/lantern/logger"
+	"reflect"
 )
 
 type Engine struct {
@@ -27,15 +27,15 @@ func MapYamlToShard(filename string) {
 	data, er := ioutil.ReadFile(filename)
 	// In case of error
 	if er != nil {
-		logger.Fatal("Cannot read the file", logger.Fields{"errors" : er})
+		logger.Fatal("Cannot read the file", logger.Fields{"errors": er})
 	}
 	// the Map for yaml unmarshalling
-	mapYaml := make(map[string]interface{})
+	mapYaml := make(map[string][]map[string]shard.Arg_type)
 	// unmarshall
 	err := yaml.Unmarshal([]byte(data), &mapYaml)
 	// In case of error
 	if err != nil {
-		logger.Fatal("Error unmarshalling yaml file", logger.Fields{"errors" : err})
+		logger.Fatal("Error unmarshalling yaml file", logger.Fields{"errors": err})
 	}
 	// Launch the analysis
 	for k, v := range mapYaml {
@@ -46,24 +46,27 @@ func MapYamlToShard(filename string) {
 	}
 }
 
-func analyseShard(in interface{}) {
-	local := in.([]interface{})
+func analyseShard(in []map[string]shard.Arg_type) {
 	shardUser := shard.InitUser()
 	// At this level, we are in the sub - cmd hierarchy
-	for i := range local {
-		// convert the subShard for analysis
-		subShard := local[i].(map[interface{}]interface{})
-		// anayse the shard
-		for k, v := range subShard {
+	for i := range in {
+		for k, v := range in[i] {
 			// Case user
 			if k == "user" {
+				//
+				// list.List
+				//
 				name, error := extractString(v, "name")
-				if (error == nil) {
+				if error == nil {
 					shardUser.ArgsL.PushBack(name)
 				} else {
-					logger.Error("Error extractString", logger.Fields{"errors" : error})
-					//fmt.Println(error.Error())
+					logger.Error("Error extractString", logger.Fields{"errors": error})
 				}
+
+				//
+				// en map[string]interface{}
+				//
+				shardUser.Args = v
 			}
 		}
 	}
@@ -74,9 +77,9 @@ func analyseShard(in interface{}) {
 
 func extractString(in interface{}, key string) (string, error) {
 	switch v := in.(type) {
-	case map[interface{}]interface{} :
+	case map[interface{}]interface{}:
 		for k, v := range v {
-			if (k == key) {
+			if k == key {
 				return v.(string), nil
 			}
 		}

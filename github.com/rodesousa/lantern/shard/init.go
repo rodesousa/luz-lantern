@@ -2,19 +2,19 @@
 package shard
 
 import (
-	"fmt"
 	"container/list"
-	"runtime"
-	"os/exec"
-	"strings"
+	"fmt"
 	"github.com/rodesousa/lantern/logger"
+	"os/exec"
+	"runtime"
+	"strings"
 )
 
 func InitUser() User {
 	if runtime.GOOS == "windows" {
-		return User{Shard{"user", "net user", make(map[string][]string), list.New()} }
+		return User{Shard{"user", "net user", make(Arg_type), list.New()}}
 	} else {
-		return User{Shard{"user", "id", make(map[string][]string), list.New()} }
+		return User{Shard{"user", "id", make(Arg_type), list.New()}}
 	}
 }
 
@@ -26,9 +26,9 @@ func (cmd Shard) Cmd() bool {
 func (cmd User) Cmd() bool {
 	logger.Debug("Testing user")
 	b := true
-	if (cmd.ArgsL.Len() != 0) {
+	if cmd.ArgsL.Len() != 0 {
 		for e := cmd.ArgsL.Front(); e != nil; e = e.Next() {
-			if ! exe_cmd(cmd.Cmd_line, e.Value.(string)) {
+			if !exe_cmd(cmd.Cmd_line, e.Value.(string)) {
 				b = false
 			}
 		}
@@ -54,10 +54,10 @@ func exe_cmd(cmd string, arg string) bool {
 
 	out, err := exec.Command(cmdTocall, args, arg).Output()
 	if err != nil {
-		logger.Error("Error occured while testing command", logger.Fields{"cmd" : cmd, "str_arg" : arg})
+		logger.Error("Error occured while testing command", logger.Fields{"cmd": cmd, "str_arg": arg})
 		return false
 	}
-	logger.InfoWithFields("Command ok", logger.Fields{"cmd" : cmd, "str_arg" : arg, "str_out" : logger.ByteToString(out)})
+	logger.InfoWithFields("Command ok", logger.Fields{"cmd": cmd, "str_arg": arg, "str_out": logger.ByteToString(out)})
 
 	return true
 }
