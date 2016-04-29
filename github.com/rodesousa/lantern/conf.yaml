@@ -12,3 +12,10 @@ cmd:
 
     - user:
         name : root
+
+    - ping :
+        name : "google.com"
+
+    - ping :
+        name : "localhost"
+        expected : false

@@ -1,14 +1,11 @@
 package shard
 
-import "container/list"
-
 type Arg_type map[string]interface{}
 
 type Shard struct {
 	Name     string
-	Cmd_line string
+	Cmd_line []string
 	Args     Arg_type
-	ArgsL    *list.List
 }
 
 type Cmd interface {
@@ -16,5 +13,9 @@ type Cmd interface {
 }
 
 type User struct {
+	Shard
+}
+
+type Ping struct {
 	Shard
 }

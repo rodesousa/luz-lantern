@@ -7,7 +7,8 @@ import (
 	"github.com/rodesousa/lantern/shard"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	//"reflect"
+//"reflect"
+	"container/list"
 )
 
 type Engine struct {
@@ -47,44 +48,33 @@ func MapYamlToShard(filename string) {
 }
 
 func analyseShard(in []map[string]shard.Arg_type) {
-	shardUser := shard.InitUser()
+	// Shard List
+	shards := list.New()
 	// At this level, we are in the sub - cmd hierarchy
 	for i := range in {
 		for k, v := range in[i] {
-			// Case user
 			if k == "user" {
-				//
-				// list.List
-				//
-				name, error := extractString(v, "name")
-				if error == nil {
-					shardUser.ArgsL.PushBack(name)
-				} else {
-					logger.Error("Error extractString", logger.Fields{"errors": error})
-				}
-
-				//
-				// en shard.Arg_type
-				//
+				// Case user
+				shardUser := shard.InitUser()
 				shardUser.Args = v
+				shards.PushBack(shardUser)
+			}  else if k == "ping" {
+				//case ping
+				shardPing := shard.InitPing()
+				shardPing.Args = v
+				shards.PushBack(shardPing)
 			}
 		}
 	}
-	//fmt.Println(shardUser)
-	// Launch test on users
-	shardUser.Cmd()
-}
 
-func extractString(in interface{}, key string) (string, error) {
-	switch v := in.(type) {
-	case map[interface{}]interface{}:
-		for k, v := range v {
-			if k == key {
-				return v.(string), nil
-			}
+	// Launch test on shards
+	for aShard := shards.Front(); aShard != nil; aShard = aShard.Next() {
+		switch v := aShard.Value.(type) {
+		case shard.User:
+			v.Cmd()
+		case shard.Ping:
+			v.Cmd()
 		}
-		return "", fmt.Errorf("Unable to find %#v in %#v", key, in)
-	default:
-		return "", fmt.Errorf("Unable to Cast %#v to string", in)
+
 	}
 }

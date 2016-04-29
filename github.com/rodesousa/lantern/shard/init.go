@@ -2,8 +2,6 @@
 package shard
 
 import (
-	"container/list"
-	"fmt"
 	"github.com/rodesousa/lantern/logger"
 	"os/exec"
 	"runtime"
@@ -12,65 +10,70 @@ import (
 
 func InitUser() User {
 	if runtime.GOOS == "windows" {
-		return User{Shard{"user", "net user", make(Arg_type), list.New()}}
+		return User{Shard{"user", []string{"net", "user"}, make(Arg_type)}}
 	} else {
-		return User{Shard{"user", "id", make(Arg_type), list.New()}}
+		return User{Shard{"user", []string{"id"}, make(Arg_type)}}
 	}
 }
 
-func (cmd Shard) Cmd() bool {
-	fmt.Println("Shard ! ")
-	return true
+func InitPing() Ping {
+	return Ping{Shard{"ping", []string{"nslookup"}, make(Arg_type)}}
 }
 
 func (cmd User) Cmd() bool {
-	logger.Debug("Testing user")
-	b := true
-	//
-	// list.List
-	//
-	if cmd.ArgsL.Len() != 0 {
-		for e := cmd.ArgsL.Front(); e != nil; e = e.Next() {
-			if !exe_cmd(cmd.Cmd_line, e.Value.(string)) {
-				b = false
-			}
-		}
-	}
-	//
-	// en shard.Arg_type
-	//
-	out, err := exec.Command(cmd.Cmd_line, cmd.Args["name"].(string)).Output()
-
-	if err != nil {
-		logger.Error("Error occured while testing command", logger.Fields{"cmd": cmd.Cmd_line, "str_arg": cmd.Args["name"].(string)})
-		return false
-	}
-	logger.InfoWithFields("Command ok", logger.Fields{"cmd": cmd.Cmd_line, "str_arg": cmd.Args["name"].(string), "str_out": logger.ByteToString(out)})
-
-	return b
+	cmdStatus, _ := exe_cmd(cmd.Cmd_line, cmd.Args["name"].(string))
+	logger.DebugWithFields("Return status of command", logger.Fields{"return" : cmdStatus})
+	return cmdStatus
 }
 
-func exe_cmd(cmd string, arg string) bool {
-	parts := strings.Fields(cmd)
-	size := len(parts)
+func (cmd Ping) Cmd() bool {
+	var toReturn = false;
+	cmdStatus, cmdMsg := exe_cmd(cmd.Cmd_line, cmd.Args["name"].(string))
+	expected := getBool(cmd.Args["expected"], true)
+	// If command == ok. Test cmdMsg
+	if cmdStatus == true {
+		toReturn = (strings.Contains(cmdMsg, cmd.Args["name"].(string)) == expected)
+	} else {
+		// Else test if result == expected in yaml conf file
+		toReturn = (cmdStatus == expected)
+	}
+	logger.DebugWithFields("Return status of command", logger.Fields{"return" : toReturn})
+	return toReturn
+}
+
+func getBool(toAnalyse interface{}, defaultValue bool) bool {
+	if toAnalyse == nil {
+		return defaultValue
+	}
+	return toAnalyse.(bool)
+}
+
+func exe_cmd(cmd []string, arg string) (bool, string) {
 	var cmdTocall string
 	var args string
 	// build the command
-	if size == 1 {
-		cmdTocall = cmd
+	if len(cmd) == 1 {
+		cmdTocall = cmd[0]
 	} else {
-		cmdTocall = parts[0]
-		for i := 1; i < len(parts); i += 1 {
-			args = args + parts[i]
-		}
+		cmdTocall = cmd[0]
+		args = strings.Join(cmd[1:len(cmd)], "")
+	}
+	// Launch the command
+	var out []byte
+	var err error
+	// One arg cmd
+	if args == "" {
+		out, err = exec.Command(cmdTocall, arg).Output()
+	} else {
+		// > One args cmd
+		out, err = exec.Command(cmdTocall, args, arg).Output()
 	}
 
-	out, err := exec.Command(cmdTocall, args, arg).Output()
 	if err != nil {
-		logger.Error("Error occured while testing command", logger.Fields{"cmd": cmd, "str_arg": arg})
-		return false
+		logger.Error("Error occured while testing command", logger.Fields{"cmd": cmd, "str_arg": arg, "str_error" : err})
+		return false, err.Error()
 	}
 	logger.InfoWithFields("Command ok", logger.Fields{"cmd": cmd, "str_arg": arg, "str_out": logger.ByteToString(out)})
 
-	return true
+	return true, logger.ByteToString(out)
 }
