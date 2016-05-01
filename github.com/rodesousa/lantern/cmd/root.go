@@ -57,7 +57,8 @@ Patrick Tavares (https://github.com/ptavares)
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		RootCmd.SetOutput(logger.GetOutLogger())
+		RootCmd.Help()
 		os.Exit(-1)
 	}
 }

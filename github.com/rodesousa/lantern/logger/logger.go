@@ -50,13 +50,6 @@ func Fatal(msg string, args Fields) {
 	os.Exit(1)
 }
 
-func ByteToString(c []byte) string {
-	n := -1
-	for i, b := range c {
-		if b == 0 {
-			break
-		}
-		n = i
-	}
-	return string(c[:n+1])
+func PrintShardResult(msg string, testShard bool, cmdArg string, cmdOut string, cmdError error) {
+	InfoWithFields(msg, Fields{"IsTestOk" : testShard, "str_cmdArg": cmdArg, "str_error" : cmdError, "str_out": cmdOut})
 }

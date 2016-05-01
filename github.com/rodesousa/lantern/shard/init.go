@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"github.com/rodesousa/lantern/utils"
 )
 
 func InitUser() User {
@@ -21,15 +22,15 @@ func InitPing() Ping {
 }
 
 func (cmd User) Cmd() bool {
-	cmdStatus, _ := exe_cmd(cmd.Cmd_line, cmd.Args["name"].(string))
-	logger.DebugWithFields("Return status of command", logger.Fields{"return" : cmdStatus})
+	cmdStatus, cmdMsg, error := exe_cmd(cmd.Cmd_line, cmd.Args["name"].(string))
+	logger.PrintShardResult("Shard User test result", cmdStatus, cmd.Args["name"].(string), cmdMsg, error)
 	return cmdStatus
 }
 
 func (cmd Ping) Cmd() bool {
 	var toReturn = false;
-	cmdStatus, cmdMsg := exe_cmd(cmd.Cmd_line, cmd.Args["name"].(string))
-	expected := getBool(cmd.Args["expected"], true)
+	cmdStatus, cmdMsg, error := exe_cmd(cmd.Cmd_line, cmd.Args["name"].(string))
+	expected := utils.GetBool(cmd.Args["expected"], true)
 	// If command == ok. Test cmdMsg
 	if cmdStatus == true {
 		toReturn = (strings.Contains(cmdMsg, cmd.Args["name"].(string)) == expected)
@@ -37,18 +38,11 @@ func (cmd Ping) Cmd() bool {
 		// Else test if result == expected in yaml conf file
 		toReturn = (cmdStatus == expected)
 	}
-	logger.DebugWithFields("Return status of command", logger.Fields{"return" : toReturn})
+	logger.PrintShardResult("Shard Ping test result", cmdStatus, cmd.Args["name"].(string), cmdMsg, error)
 	return toReturn
 }
 
-func getBool(toAnalyse interface{}, defaultValue bool) bool {
-	if toAnalyse == nil {
-		return defaultValue
-	}
-	return toAnalyse.(bool)
-}
-
-func exe_cmd(cmd []string, arg string) (bool, string) {
+func exe_cmd(cmd []string, arg string) (bool, string, error) {
 	var cmdTocall string
 	var args string
 	// build the command
@@ -68,12 +62,10 @@ func exe_cmd(cmd []string, arg string) (bool, string) {
 		// > One args cmd
 		out, err = exec.Command(cmdTocall, args, arg).Output()
 	}
-
 	if err != nil {
-		logger.Error("Error occured while testing command", logger.Fields{"cmd": cmd, "str_arg": arg, "str_error" : err})
-		return false, err.Error()
+		logger.DebugWithFields("Error occured while testing command", logger.Fields{"cmd": cmd, "str_arg": arg, "str_error" : err})
+		return false, "", err
 	}
-	logger.InfoWithFields("Command ok", logger.Fields{"cmd": cmd, "str_arg": arg, "str_out": logger.ByteToString(out)})
-
-	return true, logger.ByteToString(out)
+	logger.DebugWithFields("Command ok", logger.Fields{"cmd": cmd, "str_arg": arg, "str_out": utils.ByteToString(out)})
+	return true, utils.ByteToString(out), err
 }
