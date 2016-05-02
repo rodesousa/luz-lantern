@@ -28,7 +28,7 @@ func MapYamlToShard(filename string) {
 	data, er := ioutil.ReadFile(filename)
 	// In case of error
 	if er != nil {
-		logger.Fatal("Cannot read the file", logger.Fields{"errors": er})
+		logger.FatalWithFields("Cannot read the file", logger.Fields{"errors": er})
 	}
 	// the Map for yaml unmarshalling
 	mapYaml := make(map[string][]map[string]shard.Arg_type)
@@ -36,7 +36,7 @@ func MapYamlToShard(filename string) {
 	err := yaml.Unmarshal([]byte(data), &mapYaml)
 	// In case of error
 	if err != nil {
-		logger.Fatal("Error unmarshalling yaml file", logger.Fields{"errors": err})
+		logger.FatalWithFields("Error unmarshalling yaml file", logger.Fields{"errors": err})
 	}
 	// Launch the analysis
 	for k, v := range mapYaml {

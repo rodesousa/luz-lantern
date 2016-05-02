@@ -24,7 +24,9 @@ import (
 )
 
 var cfgFile string
+var logFile string
 var debug bool
+var off bool
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -69,15 +71,17 @@ func init() {
 	// Cobra supports Persistent Flags, which, if defined here,
 	// will be global for your application.
 
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.luz-lantern.yaml)")
+	RootCmd.PersistentFlags().StringVar(&logFile, "logfile", "", "log file output (default is current path)")
 	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "show debug message")
+	RootCmd.PersistentFlags().BoolVarP(&off, "off", "o", false, "disable out console log")
+	//RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.luz-lantern.yaml)")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initFromCL() {
 
 	// initialize debug level
-	logger.Init(debug)
+	logger.Init(debug, !off, (logFile!= ""), logFile)
 
 	if cfgFile != "" {
 		// enable ability to specify config file via flag
