@@ -2,28 +2,50 @@
 package shard
 
 import (
+	"fmt"
 	"github.com/rodesousa/lantern/logger"
 	"github.com/rodesousa/lantern/utils"
 	"os/exec"
 	"strings"
 )
 
-func (cmd Ping) Cmd() bool {
-	var toReturn = false
-	cmdStatus, cmdMsg, error := exe_cmd(cmd.Cmd_line, cmd.Args["name"].(string))
-	expected := utils.GetBool(cmd.Args["expected"], true)
-	// If command == ok. Test cmdMsg
-	if cmdStatus == true {
-		toReturn = (strings.Contains(cmdMsg, cmd.Args["name"].(string)) == expected)
-	} else {
-		// Else test if result == expected in yaml conf file
-		toReturn = (cmdStatus == expected)
+func getExpected(cmd Shard) bool {
+	if val, ok := cmd.Args["expected"]; ok {
+		return val.(bool)
 	}
-	logger.PrintShardResult("Shard Ping test result", cmdStatus, cmd.Args["name"].(string), cmdMsg, error)
-	return toReturn
+	return false
 }
 
-func exe_cmd(cmd []string, arg string) (bool, string, error) {
+// todo
+// a mettre ds logger
+func printCmdResult(expected bool, cmdStatus bool, cmd Shard) string {
+	if expected == cmdStatus {
+		if cmdStatus == false {
+			return "Test Ok: " + cmd.Name + " " + cmd.Args["name"].(string)
+		}
+		return "Test KO but expected KO: " + cmd.Name + " " + cmd.Args["name"].(string)
+	}
+	if cmdStatus == false {
+		return "Test KO: " + cmd.Name + " " + cmd.Args["name"].(string)
+	}
+	return "Test Ok but expected KO : " + cmd.Name + " " + cmd.Args["name"].(string)
+}
+
+func (cmd Shard) Cmd() bool {
+	cmdStatus, cmdMsg, error := exeCmd(cmd.Cmd_line, cmd.Args["name"].(string))
+	//look expected argument
+	expected := getExpected(cmd)
+	msg := printCmdResult(expected, cmdStatus, cmd)
+	fmt.Println(msg)
+
+	if (error != nil) && (cmdMsg != "") {
+		// pour eviter le unsed... a retirer !
+	}
+
+	return expected == cmdStatus
+}
+
+func exeCmd(cmd []string, arg string) (bool, string, error) {
 	var cmdTocall string
 	var args string
 	// build the command

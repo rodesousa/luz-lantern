@@ -7,7 +7,7 @@ import (
 	"github.com/rodesousa/lantern/shard"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-//"reflect"
+	//"reflect"
 	"container/list"
 )
 
@@ -53,28 +53,15 @@ func analyseShard(in []map[string]shard.Arg_type) {
 	// At this level, we are in the sub - cmd hierarchy
 	for i := range in {
 		for k, v := range in[i] {
-			if k == "user" {
-				// Case user
-				shardUser := shard.InitUser()
-				shardUser.Args = v
-				shards.PushBack(shardUser)
-			}  else if k == "ping" {
-				//case ping
-				shardPing := shard.InitPing()
-				shardPing.Args = v
-				shards.PushBack(shardPing)
-			}
+			patternMatching(k, v, shards)
 		}
 	}
 
 	// Launch test on shards
 	for aShard := shards.Front(); aShard != nil; aShard = aShard.Next() {
 		switch v := aShard.Value.(type) {
-		case shard.User:
-			v.Cmd()
-		case shard.Ping:
+		case shard.Shard:
 			v.Cmd()
 		}
-
 	}
 }

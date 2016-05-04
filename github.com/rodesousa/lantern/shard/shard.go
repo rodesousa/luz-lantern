@@ -12,10 +12,8 @@ type Cmd interface {
 	Cmd() bool
 }
 
-type User struct {
-	Shard
-}
+// deprecated
+type User Shard
 
-type Ping struct {
-	Shard
-}
+// deprecated
+type Ping Shard
