@@ -1,0 +1,21 @@
+---
+
+cmd:
+    - user:
+        name: aze
+
+    - user:
+        name: lala
+
+    - user:
+        name : ippon
+
+    - user:
+        name : root
+
+    - ping :
+        name : "google.com"
+
+    - ping :
+        name : "localhost"
+        expected : false
