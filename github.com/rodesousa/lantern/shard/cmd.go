@@ -13,22 +13,22 @@ func getExpected(cmd Shard) bool {
 	if val, ok := cmd.Args["expected"]; ok {
 		return val.(bool)
 	}
-	return false
+	return true
 }
 
 // todo
 // a mettre ds logger
 func printCmdResult(expected bool, cmdStatus bool, cmd Shard) string {
 	if expected == cmdStatus {
-		if cmdStatus == false {
+		if cmdStatus {
 			return "Test Ok: " + cmd.Name + " " + cmd.Args["name"].(string)
 		}
 		return "Test KO but expected KO: " + cmd.Name + " " + cmd.Args["name"].(string)
 	}
-	if cmdStatus == false {
-		return "Test KO: " + cmd.Name + " " + cmd.Args["name"].(string)
+	if cmdStatus {
+		return "Test Ok but expected KO : " + cmd.Name + " " + cmd.Args["name"].(string)
 	}
-	return "Test Ok but expected KO : " + cmd.Name + " " + cmd.Args["name"].(string)
+	return "Test KO: " + cmd.Name + " " + cmd.Args["name"].(string)
 }
 
 func (cmd Shard) Cmd() bool {
@@ -46,29 +46,28 @@ func (cmd Shard) Cmd() bool {
 }
 
 func exeCmd(cmd []string, arg string) (bool, string, error) {
-	var cmdTocall string
-	var args string
-	// build the command
-	if len(cmd) == 1 {
-		cmdTocall = cmd[0]
-	} else {
-		cmdTocall = cmd[0]
-		args = strings.Join(cmd[1:len(cmd)], "")
-	}
-	// Launch the command
+	var cmdTocall, args string
 	var out []byte
 	var err error
-	// One arg cmd
+
+	// build the command
+	cmdTocall = cmd[0]
+	if len(cmd) != 1 {
+		args = strings.Join(cmd[1:len(cmd)], "")
+	}
+
+	// One args or more
 	if args == "" {
 		out, err = exec.Command(cmdTocall, arg).Output()
 	} else {
-		// > One args cmd
 		out, err = exec.Command(cmdTocall, args, arg).Output()
 	}
+
 	if err != nil {
 		logger.DebugWithFields("Error occured while testing command", logger.Fields{"cmd": cmd, "str_arg": arg, "str_error": err})
 		return false, "", err
 	}
+
 	logger.DebugWithFields("Command ok", logger.Fields{"cmd": cmd, "str_arg": arg, "str_out": utils.ByteToString(out)})
 	return true, utils.ByteToString(out), err
 }
