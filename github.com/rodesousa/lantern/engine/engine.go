@@ -8,7 +8,6 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	//"reflect"
-	"container/list"
 )
 
 type Engine struct {
@@ -24,23 +23,17 @@ func (engine Engine) Run() bool {
 }
 
 func MapYamlToShard(filename string) {
-	// read the file from commande line
 	data, er := ioutil.ReadFile(filename)
-	// In case of error
 	if er != nil {
 		logger.FatalWithFields("Cannot read the file", logger.Fields{"errors": er})
 	}
-	// the Map for yaml unmarshalling
 	mapYaml := make(map[string][]map[string]shard.Arg_type)
-	// unmarshall
 	err := yaml.Unmarshal([]byte(data), &mapYaml)
-	// In case of error
 	if err != nil {
 		logger.FatalWithFields("Error unmarshalling yaml file", logger.Fields{"errors": err})
 	}
 	// Launch the analysis
 	for k, v := range mapYaml {
-		// if it's a cmd, analyse the shards
 		if k == "cmd" {
 			analyseShard(v)
 		}
@@ -48,20 +41,26 @@ func MapYamlToShard(filename string) {
 }
 
 func analyseShard(in []map[string]shard.Arg_type) {
-	// Shard List
-	shards := list.New()
-	// At this level, we are in the sub - cmd hierarchy
+	shards := make([]shard.Shard, len(in))
+	// Built yaml to object
 	for i := range in {
 		for k, v := range in[i] {
-			patternMatching(k, v, shards)
+			shards[i] = patternMatching(k, v)
 		}
 	}
+	for i := range shards {
+		p := &shards[i]
+		p.Cmd()
+	}
 
-	// Launch test on shards
-	for aShard := shards.Front(); aShard != nil; aShard = aShard.Next() {
-		switch v := aShard.Value.(type) {
-		case shard.Shard:
-			v.Cmd()
-		}
+	ko := shard.KoShards(shards)
+	ok := len(shards) - len(ko)
+	fmt.Println("Test Ok :", ok, "/", len(shards))
+
+	fmt.Println("Test KO :", len(ko), "/", len(shards))
+
+	for i := range ko {
+		shard := ko[i]
+		fmt.Println(shard.Name+" : ", shard.Err)
 	}
 }

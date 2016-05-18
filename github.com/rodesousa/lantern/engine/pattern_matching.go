@@ -2,14 +2,13 @@
 package engine
 
 import (
-	"container/list"
 	"github.com/rodesousa/lantern/shard"
 )
 
-func patternMatching(key string, value shard.Arg_type, list *list.List) {
+func patternMatching(key string, value shard.Arg_type) shard.Shard {
 	item := initShard(key)
 	item.Args = value
-	list.PushBack(item)
+	return item
 }
 
 func initShard(key string) shard.Shard {
