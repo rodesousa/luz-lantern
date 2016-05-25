@@ -14,8 +14,8 @@
 
 package main
 
-import "github.com/rodesousa/lantern/cmd"
+import "github.com/rodesousa/lantern/controller"
 
 func main() {
-	cmd.Execute()
+	controller.Execute()
 }

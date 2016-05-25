@@ -12,17 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package engine provides the different engine possible
-package engine
+package mapper
 
 import (
 	"github.com/rodesousa/lantern/shard"
 )
 
-func Run(shards []shard.Shard) []shard.Shard {
-	for i := range shards {
-		p := &shards[i]
-		p.Cmd()
+func PatternMatching(key string, value shard.ShardArguments) shard.Shard {
+	item := initShard(key)
+	item.Args = value
+	return item
+}
+
+func initShard(key string) shard.Shard {
+	switch key {
+	case "user":
+		return shard.InitUser()
+	case "ping":
+		return shard.InitPing()
 	}
-	return shards
+	return shard.InitUnknow()
 }
