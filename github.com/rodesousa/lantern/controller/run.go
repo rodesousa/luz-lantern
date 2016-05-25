@@ -12,14 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package controller
 
 import (
+	"fmt"
 	"github.com/rodesousa/lantern/engine"
 	log "github.com/rodesousa/lantern/logger"
+	"github.com/rodesousa/lantern/mapper"
+	"github.com/rodesousa/lantern/shard"
 	"github.com/spf13/cobra"
 	"os"
+	"strconv"
 )
+
+//Controller
+type Controller struct {
+	filename string
+}
+
+var controller Controller
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
@@ -40,10 +51,43 @@ func runLuz(cmd *cobra.Command, args []string) {
 	} else {
 		log.Info("Starting lantern with run command")
 		log.DebugWithFields("run called", log.Fields{"args": args})
-		engine.MapYamlToShard(args[0])
+		controller = Controller{args[0]}
+		// Launch lantern in selected mode
+		launchLantern()
 
 	}
 	log.Info("End lantern")
+}
+
+// Main method of the lantern program
+func launchLantern() {
+	// Init the mapper
+	shardsAsYaml, err := mapper.MappingYaml(controller.filename)
+	if err == nil {
+		// Get the shards from the Mapper
+		shards := mapper.AnalyseShard(shardsAsYaml["cmd"])
+		// Call the Engine with the shards
+		engine.Run(shards)
+
+		koShards := shard.KoShards(shards)
+		ko := len(koShards)
+		ok := len(shards) - len(koShards)
+		sOk := strconv.Itoa(ok) + "/" + strconv.Itoa(len(shards))
+		sKo := strconv.Itoa(ko) + "/" + strconv.Itoa(len(shards))
+		log.InfoWithFields("Test OK", log.Fields{"nbOk": sOk})
+		log.InfoWithFields("Test KO", log.Fields{"nbKO": sKo})
+
+		if ko > 0 {
+			for i := range koShards {
+				shard := koShards[i]
+				err := fmt.Sprintf("%s : %s", shard.Name, shard.Status.Err)
+				log.Info(err)
+			}
+		}
+	} else {
+		//error in mapping yaml
+		//TODO
+	}
 }
 
 func init() {
