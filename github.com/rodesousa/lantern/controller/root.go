@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package controller
 
 import (
 	"fmt"
-	"os"
-
+	"github.com/rodesousa/lantern/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/rodesousa/lantern/logger"
+	"os"
 )
 
 var cfgFile string
@@ -81,7 +80,7 @@ func init() {
 func initFromCL() {
 
 	// initialize debug level
-	logger.Init(debug, !off, (logFile!= ""), logFile)
+	logger.Init(debug, !off, (logFile != ""), logFile)
 
 	if cfgFile != "" {
 		// enable ability to specify config file via flag
@@ -89,8 +88,8 @@ func initFromCL() {
 	}
 
 	viper.SetConfigName(".luz-lantern") // name of config file (without extension)
-	viper.AddConfigPath("$HOME")  // adding home directory as first search path
-	viper.AutomaticEnv()          // read in environment variables that match
+	viper.AddConfigPath("$HOME")        // adding home directory as first search path
+	viper.AutomaticEnv()                // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
