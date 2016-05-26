@@ -26,7 +26,7 @@ func getExpected(shard *Shard) bool {
 }
 
 func (s *Shard) Cmd() bool {
-	status, error := exeCmd(s.Command, s.Args["name"].(string))
+	status, error := s.exeCmd()
 	if getExpected(s) != status {
 		s.Status.Err = error
 		s.Status.Check = false
@@ -40,12 +40,12 @@ func (shard *Shard) Do(fn FnEmpty) string {
 	return fn()
 }
 
-func exeCmd(cmd string, arg string) (bool, error) {
+func (s Shard) exeCmd() (bool, error) {
 	var out []byte
 	var err error
 
 	// One args or more
-	out, err = exec.Command(cmd, arg).Output()
+	out, err = exec.Command(s.Command, s.CommandArguments).Output()
 
 	if out != nil { //TODO
 	}
