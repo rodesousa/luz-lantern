@@ -14,6 +14,8 @@
 package shard
 
 import (
+	"errors"
+	"fmt"
 	"runtime"
 )
 
@@ -25,10 +27,11 @@ type Result struct {
 }
 
 type Shard struct {
-	Name     string
-	Cmd_line []string
-	Args     ShardArguments
-	Status   Result
+	Name             string
+	Command          string
+	CommandArguments string
+	Args             ShardArguments
+	Status           Result
 }
 
 type Cmd interface {
@@ -50,23 +53,72 @@ func KoShards(shards []Shard) []Shard {
 // INIT
 //
 
+type MapString map[string]string
+
+func (m MapString) exists(find string) bool {
+	_, ok := m[find]
+	return ok
+}
+
+func newErrorArg(err string) error {
+	return errors.New(fmt.Sprintf("Value %s doesnt exist", err))
+}
+
+func (m ShardArguments) nameExist(name string) string {
+	if v, ok := m["name"]; ok {
+		return fmt.Sprintf("name %s", v)
+	} else {
+		return "name"
+	}
+}
+
+func (m ShardArguments) argsExist(name string) error {
+	if _, ok := m[name]; ok {
+		return nil
+	} else {
+		return newErrorArg(name)
+	}
+}
+
 var ResultDefault = Result{true, nil}
 
 // USER
-func InitUser() Shard {
+func InitUser(args ShardArguments) (error, Shard) {
 	if runtime.GOOS == "windows" {
-		return Shard{"user", []string{"net", "user"}, make(ShardArguments), ResultDefault}
+		//return Shard{"user", []string{"net", "user"}, value, ResultDefault}
+		return errors.New("not implem"), Shard{}
 	} else {
-		return Shard{"user", []string{"id"}, make(ShardArguments), ResultDefault}
+		name := args.nameExist("user")
+
+		var cmd, cmdArgs string
+		if err := args.argsExist("name"); err != nil {
+			cmd = "id"
+			cmdArgs = args["name"].(string)
+		} else {
+			return err, Shard{}
+		}
+
+		return nil, Shard{name, cmd, cmdArgs, args, ResultDefault}
 	}
 }
 
 // PING
-func InitPing() Shard {
-	return Shard{"ping", []string{"nslookup"}, make(ShardArguments), ResultDefault}
+func InitPing(args ShardArguments) (error, Shard) {
+	name := args.nameExist("ping")
+
+	var cmd, cmdArgs string
+	if err := args.argsExist("url"); err != nil {
+		cmd = "nslookup"
+		cmdArgs = args["url"].(string)
+	} else {
+		return err, Shard{}
+	}
+
+	return nil, Shard{name, cmd, cmdArgs, args, ResultDefault}
 }
 
 // UNKNOW
-func InitUnknow() Shard {
-	return Shard{"Unknow", []string{"???"}, make(ShardArguments), ResultDefault}
+func InitUnknow() (error, Shard) {
+	return errors.New("not implem"), Shard{}
+	//return Shard{"Unknow", []string{"???"}, make(ShardArguments), ResultDefault}
 }

@@ -50,7 +50,9 @@ func AnalyseShard(in []map[string]shard.ShardArguments) []shard.Shard {
 	// At this level, we are in the sub - cmd hierarchy
 	for i := range in {
 		for k, v := range in[i] {
-			shards = append(shards, PatternMatching(k, v))
+			//TODO GERER LES CAS ERREUR
+			_, response := PatternMatching(k, v)
+			shards = append(shards, response)
 		}
 	}
 	return shards

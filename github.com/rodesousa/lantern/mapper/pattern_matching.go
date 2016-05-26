@@ -18,18 +18,13 @@ import (
 	"github.com/rodesousa/lantern/shard"
 )
 
-func PatternMatching(key string, value shard.ShardArguments) shard.Shard {
-	item := initShard(key)
-	item.Args = value
-	return item
-}
-
-func initShard(key string) shard.Shard {
+func PatternMatching(key string, value shard.ShardArguments) (error, shard.Shard) {
 	switch key {
 	case "user":
-		return shard.InitUser()
+		return shard.InitUser(value)
 	case "ping":
-		return shard.InitPing()
+		return shard.InitPing(value)
 	}
 	return shard.InitUnknow()
+
 }
