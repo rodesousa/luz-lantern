@@ -23,7 +23,7 @@ type ShardArguments map[string]interface{}
 
 type Result struct {
 	Check bool
-	Err   error
+	Err   string
 }
 
 type Shard struct {
@@ -36,7 +36,6 @@ type Shard struct {
 
 type Cmd interface {
 	Cmd() Result
-	Do() string
 }
 
 func KoShards(shards []Shard) []Shard {
@@ -80,7 +79,7 @@ func (m ShardArguments) argsExist(name string) error {
 	}
 }
 
-var ResultDefault = Result{true, nil}
+var ResultDefault = Result{true, ""}
 
 // USER
 func InitUser(args ShardArguments) (error, Shard) {

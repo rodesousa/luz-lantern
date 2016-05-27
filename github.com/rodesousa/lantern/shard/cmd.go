@@ -15,6 +15,7 @@
 package shard
 
 import (
+	"fmt"
 	"os/exec"
 )
 
@@ -26,9 +27,14 @@ func getExpected(shard *Shard) bool {
 }
 
 func (s *Shard) Cmd() bool {
-	status, error := s.exeCmd()
+	out, status, error := s.exeCmd()
 	if getExpected(s) != status {
-		s.Status.Err = error
+		if error != nil {
+			s.Status.Err = fmt.Sprintf("\n %s", error)
+		} else {
+			s.Status.Err = fmt.Sprintf("\n %s", out)
+		}
+
 		s.Status.Check = false
 	}
 	return s.Status.Check
@@ -40,19 +46,12 @@ func (shard *Shard) Do(fn FnEmpty) string {
 	return fn()
 }
 
-func (s Shard) exeCmd() (bool, error) {
-	var out []byte
-	var err error
-
-	// One args or more
-	out, err = exec.Command(s.Command, s.CommandArguments).Output()
-
-	if out != nil { //TODO
-	}
+func (s Shard) exeCmd() ([]byte, bool, error) {
+	out, err := exec.Command(s.Command, s.CommandArguments).Output()
 
 	if err != nil {
-		return false, err
+		return out, false, err
 	} else {
-		return true, err
+		return out, true, err
 	}
 }
