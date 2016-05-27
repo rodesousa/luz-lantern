@@ -66,9 +66,9 @@ func newErrorArg(err string) error {
 
 func (m ShardArguments) nameExist(name string) string {
 	if v, ok := m["name"]; ok {
-		return fmt.Sprintf("name %s", v)
+		return fmt.Sprintf("%s %s", name, v)
 	} else {
-		return "name"
+		return name
 	}
 }
 
@@ -84,6 +84,7 @@ var ResultDefault = Result{true, nil}
 
 // USER
 func InitUser(args ShardArguments) (error, Shard) {
+
 	if runtime.GOOS == "windows" {
 		//return Shard{"user", []string{"net", "user"}, value, ResultDefault}
 		return errors.New("not implem"), Shard{}
@@ -91,10 +92,11 @@ func InitUser(args ShardArguments) (error, Shard) {
 		name := args.nameExist("user")
 
 		var cmd, cmdArgs string
-		if err := args.argsExist("name"); err != nil {
+		if err := args.argsExist("name"); err == nil {
 			cmd = "id"
 			cmdArgs = args["name"].(string)
 		} else {
+
 			return err, Shard{}
 		}
 
@@ -107,7 +109,7 @@ func InitPing(args ShardArguments) (error, Shard) {
 	name := args.nameExist("ping")
 
 	var cmd, cmdArgs string
-	if err := args.argsExist("url"); err != nil {
+	if err := args.argsExist("url"); err == nil {
 		cmd = "nslookup"
 		cmdArgs = args["url"].(string)
 	} else {
