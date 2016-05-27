@@ -19,6 +19,17 @@ import (
 	"runtime"
 )
 
+type Check struct {
+	Enabled bool
+}
+
+var CheckDisabled Check = Check{false}
+var CheckEnabled Check = Check{true}
+
+const (
+	ValueChecked string = "Luz True"
+)
+
 type ShardArguments map[string]interface{}
 
 type Result struct {
@@ -32,6 +43,7 @@ type Shard struct {
 	CommandArguments string
 	Args             ShardArguments
 	Status           Result
+	Checked          Check
 }
 
 type Cmd interface {
@@ -99,7 +111,7 @@ func InitUser(args ShardArguments) (error, Shard) {
 			return err, Shard{}
 		}
 
-		return nil, Shard{name, cmd, cmdArgs, args, ResultDefault}
+		return nil, Shard{name, cmd, cmdArgs, args, ResultDefault, CheckDisabled}
 	}
 }
 
@@ -110,12 +122,14 @@ func InitPing(args ShardArguments) (error, Shard) {
 	var cmd, cmdArgs string
 	if err := args.argsExist("url"); err == nil {
 		cmd = "nslookup"
-		cmdArgs = args["url"].(string)
+		//TODO extraire la valeur Checked et la construction de la commande
+		cmdArgs = fmt.Sprintf("%s && echo \" %s \"", args["url"].(string), ValueChecked)
+
 	} else {
 		return err, Shard{}
 	}
 
-	return nil, Shard{name, cmd, cmdArgs, args, ResultDefault}
+	return nil, Shard{name, cmd, cmdArgs, args, ResultDefault, CheckEnabled}
 }
 
 // UNKNOW
