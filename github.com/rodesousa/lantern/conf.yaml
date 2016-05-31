@@ -14,8 +14,8 @@ cmd:
         name : root
 
     - ping :
-        name : "google.com"
+        url : "google.com"
 
     - ping :
-        name : "localhost"
+        url : "localhost"
         expected : false

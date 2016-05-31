@@ -15,50 +15,44 @@
 package shard
 
 import (
+	"fmt"
 	"os/exec"
 	"strings"
 )
 
-func getExpected(cmd *Shard) bool {
-	if val, ok := cmd.Args["expected"]; ok {
+func getExpected(shard *Shard) bool {
+	if val, ok := shard.Args["expected"]; ok {
 		return val.(bool)
 	}
 	return true
 }
 
-func (cmd *Shard) Cmd() bool {
-	status, error := exeCmd(cmd.Cmd_line, cmd.Args["name"].(string))
-	if getExpected(cmd) != status {
-		cmd.Status.Err = error
-		cmd.Status.Check = false
+func (s *Shard) Cmd() bool {
+	out, status, error := s.exeCmd()
+	if getExpected(s) != status {
+		if error != nil {
+			s.Status.Err = fmt.Sprintf("\n %s", error)
+			s.Status.Check = false
+		}
+
+		if s.Checked.Enabled {
+			if strings.Contains(string(out[:]), ValueChecked) != false {
+				s.Status.Err = fmt.Sprintf("\n %s", out)
+				s.Status.Check = false
+			}
+		}
 	}
-	return cmd.Status.Check
+	return s.Status.Check
 }
 
-func exeCmd(cmd []string, arg string) (bool, error) {
-	var cmdTocall, args string
-	var out []byte
-	var err error
+type FnEmpty func() string
 
-	// build the command
-	cmdTocall = cmd[0]
-	if len(cmd) != 1 {
-		args = strings.Join(cmd[1:len(cmd)], "")
-	}
-
-	// One args or more
-	if args == "" {
-		out, err = exec.Command(cmdTocall, arg).Output()
-	} else {
-		out, err = exec.Command(cmdTocall, args, arg).Output()
-	}
-
-	if out != nil { //TODO
-	}
+func (s Shard) exeCmd() ([]byte, bool, error) {
+	out, err := exec.Command(s.Command, s.CommandArguments).Output()
 
 	if err != nil {
-		return false, err
+		return out, false, err
 	} else {
-		return true, err
+		return out, true, err
 	}
 }
