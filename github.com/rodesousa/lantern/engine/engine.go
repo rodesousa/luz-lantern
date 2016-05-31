@@ -17,6 +17,8 @@ package engine
 
 import (
 	"github.com/rodesousa/lantern/shard"
+	"sync"
+	"runtime"
 )
 
 func Run(shards []shard.Shard) []shard.Shard {
@@ -25,4 +27,31 @@ func Run(shards []shard.Shard) []shard.Shard {
 		p.Cmd()
 	}
 	return shards
+}
+
+func RunMultiThread(shards []shard.Shard) []shard.Shard {
+	// Number of available cores
+	numCore := runtime.NumCPU()
+	c := make(chan bool, numCore - 1)
+	wg := new(sync.WaitGroup)
+	// Number of goroutines
+	wg.Add(len(shards))
+	// call the goroutines
+	for i := range shards {
+		go callShardExec(c, wg, &shards[i])
+		// blocking c at each iteration
+		c <- true
+	}
+	// Wait for all the children to die
+	wg.Wait()
+	close(c)
+	return shards
+}
+
+func callShardExec(c chan bool, wg *sync.WaitGroup, shard *shard.Shard) {
+	defer func() {
+		<-c
+		wg.Done() // Decrease the number of alive goroutines
+	}()
+	shard.Cmd()
 }

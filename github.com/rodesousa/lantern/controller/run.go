@@ -67,7 +67,7 @@ func launchLantern() {
 		// Get the shards from the Mapper
 		shards := mapper.AnalyseShard(shardsAsYaml["cmd"])
 		// Call the Engine with the shards
-		engine.Run(shards)
+		engine.RunMultiThread(shards)
 
 		koShards := shard.KoShards(shards)
 		ko := len(koShards)
