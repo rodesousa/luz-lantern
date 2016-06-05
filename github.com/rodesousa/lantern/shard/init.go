@@ -48,8 +48,7 @@ func InitUser(args ShardArguments) (error, Shard) {
 		var cmdArgs []string
 		if err := args.argsExist("name"); err == nil {
 			cmd = "id"
-			//cmdArgs = args["name"].(string)
-			cmdArgs = []string{""}
+			cmdArgs = []string{args["name"].(string)}
 		} else {
 
 			return err, Shard{}
@@ -67,9 +66,7 @@ func InitPing(args ShardArguments) (error, Shard) {
 	var cmdArgs []string
 	if err := args.argsExist("url"); err == nil {
 		cmd = "nslookup"
-		//TODO extraire la valeur Checked et la construction de la commande
-		//cmdArgs = fmt.Sprintf("%s && echo \" %s \"", args["url"].(string), ValueChecked)
-		cmdArgs = []string{""}
+		cmdArgs = []string{args["url"].(string), "echo", ValueChecked}
 
 	} else {
 		return err, Shard{}
