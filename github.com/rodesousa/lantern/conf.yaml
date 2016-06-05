@@ -1,21 +1,24 @@
 ---
 
 cmd:
-    - user:
-        name: aze
+    #    - user:
+    #        name: aze
+    #
+    #    - user:
+    #        name: lala
+    #
+    #    - user:
+    #        name : ippon
+    #
+    #    - user:
+    #        name : root
+    #
+    #    - ping :
+    #        url : "google.com"
+    #
+    #    - ping :
+    #        url : "localhost"
+    #        expected : false
 
-    - user:
-        name: lala
-
-    - user:
-        name : ippon
-
-    - user:
-        name : root
-
-    - ping :
-        url : "google.com"
-
-    - ping :
-        url : "localhost"
-        expected : false
+    - curl:
+        url: "http://www.google.fr"

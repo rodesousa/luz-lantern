@@ -24,6 +24,8 @@ func PatternMatching(key string, value shard.ShardArguments) (error, shard.Shard
 		return shard.InitUser(value)
 	case "ping":
 		return shard.InitPing(value)
+	case "curl":
+		return shard.InitCurl(value)
 	}
 	return shard.InitUnknow()
 

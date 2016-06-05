@@ -38,17 +38,18 @@ var ResultDefault = Result{true, ""}
 
 // USER
 func InitUser(args ShardArguments) (error, Shard) {
-
 	if runtime.GOOS == "windows" {
 		//return Shard{"user", []string{"net", "user"}, value, ResultDefault}
 		return errors.New("not implem"), Shard{}
 	} else {
 		name := args.nameExist("user")
 
-		var cmd, cmdArgs string
+		var cmd string
+		var cmdArgs []string
 		if err := args.argsExist("name"); err == nil {
 			cmd = "id"
-			cmdArgs = args["name"].(string)
+			//cmdArgs = args["name"].(string)
+			cmdArgs = []string{""}
 		} else {
 
 			return err, Shard{}
@@ -62,17 +63,36 @@ func InitUser(args ShardArguments) (error, Shard) {
 func InitPing(args ShardArguments) (error, Shard) {
 	name := args.nameExist("ping")
 
-	var cmd, cmdArgs string
+	var cmd string
+	var cmdArgs []string
 	if err := args.argsExist("url"); err == nil {
 		cmd = "nslookup"
 		//TODO extraire la valeur Checked et la construction de la commande
-		cmdArgs = fmt.Sprintf("%s && echo \" %s \"", args["url"].(string), ValueChecked)
+		//cmdArgs = fmt.Sprintf("%s && echo \" %s \"", args["url"].(string), ValueChecked)
+		cmdArgs = []string{""}
 
 	} else {
 		return err, Shard{}
 	}
 
 	return nil, Shard{name, cmd, cmdArgs, args, ResultDefault, CheckEnabled}
+}
+
+// CURL
+func InitCurl(args ShardArguments) (error, Shard) {
+	name := args.nameExist("curl")
+
+	var cmd string
+	var cmdArgs []string
+	if err := args.argsExist("url"); err == nil {
+		cmd = "curl"
+		cmdArgs = []string{args["url"].(string), "--silent", "-m", "15"}
+
+	} else {
+		return err, Shard{}
+	}
+
+	return nil, Shard{name, cmd, cmdArgs, args, ResultDefault, CheckDisabled}
 }
 
 // UNKNOW

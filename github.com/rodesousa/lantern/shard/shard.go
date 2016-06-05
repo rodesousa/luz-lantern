@@ -34,7 +34,7 @@ type Result struct {
 type Shard struct {
 	Name             string
 	Command          string
-	CommandArguments string
+	CommandArguments []string
 	Args             ShardArguments
 	Status           Result
 	Checked          Check
