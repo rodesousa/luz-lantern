@@ -25,6 +25,13 @@ type ConsoleFormatter struct{}
 
 func (f ConsoleFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	b := &bytes.Buffer{}
+
+	color := entry.Data["color"]
+	if(color != nil){
+		delete(entry.Data, "color")
+		fmt.Fprintf(b, "\x1b[%dm", color)
+	}
+
 	f.appendKeyValue(b, "time", entry.Time.Format(logrus.DefaultTimestampFormat))
 	fmt.Fprintf(b, "[%s] ", entry.Level)
 
@@ -36,6 +43,9 @@ func (f ConsoleFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	}
 
 	b.WriteByte('\n')
+	if(color != nil) {
+		fmt.Fprintf(b, "\x1b[%dm", NO_COLOR)
+	}
 	return b.Bytes(), nil
 }
 

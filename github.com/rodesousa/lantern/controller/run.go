@@ -74,14 +74,14 @@ func launchLantern() {
 		ok := len(shards) - len(koShards)
 		sOk := strconv.Itoa(ok) + "/" + strconv.Itoa(len(shards))
 		sKo := strconv.Itoa(ko) + "/" + strconv.Itoa(len(shards))
-		log.InfoWithFields("Test OK", log.Fields{"nbOk": sOk})
-		log.InfoWithFields("Test KO", log.Fields{"nbKO": sKo})
-
+		log.InfoWithFieldsColor("Test OK", log.Fields{"nbOk": sOk}, log.GREEN)
+		log.InfoWithFieldsColor("Test KO", log.Fields{"nbKO": sKo}, log.RED)
+		log.InfoColor("Errors : ", log.YELLOW)
 		if ko > 0 {
 			for i := range koShards {
 				shard := koShards[i]
 				err := fmt.Sprintf("%s : %s", shard.Name, shard.Status.Err)
-				log.Info(err)
+				log.InfoColor(err, log.YELLOW)
 			}
 		}
 	} else {
