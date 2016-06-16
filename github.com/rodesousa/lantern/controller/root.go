@@ -22,10 +22,13 @@ import (
 	"os"
 )
 
-var cfgFile string
-var logFile string
-var debug bool
-var off bool
+var (
+	cfgFile string
+	logFile string
+	debug   bool
+	off     bool
+	server  bool
+)
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -73,11 +76,17 @@ func init() {
 	RootCmd.PersistentFlags().StringVar(&logFile, "logfile", "", "log file output (default is current path)")
 	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "show debug message")
 	RootCmd.PersistentFlags().BoolVarP(&off, "off", "o", false, "disable out console log")
+	RootCmd.PersistentFlags().BoolVarP(&server, "server", "s", false, "mode lantern server")
 	//RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.luz-lantern.yaml)")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initFromCL() {
+
+	//mode server, disabled out console log
+	if server {
+		off = true
+	}
 
 	// initialize debug level
 	logger.Init(debug, !off, (logFile != ""), logFile)

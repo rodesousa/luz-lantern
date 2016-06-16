@@ -28,9 +28,20 @@ Build the program :
 cd $GOPATH/src/github.com/rodesousa/lantern
 go install .
 ```
-Enjoy !
-```bash
-$GOPATH/bin/lantern run `yaml__file`
+## Run
+
+```
+lantern run `yaml__file`
+```
+
+Mode server (port 8080)
+```
+lantern run `yaml__file` -s &
+```
+
+Debug
+```
+lantern run `yaml__file` -d
 ```
 
 ### luz with vim

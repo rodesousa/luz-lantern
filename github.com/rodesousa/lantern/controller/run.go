@@ -15,12 +15,14 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/rodesousa/lantern/engine"
 	log "github.com/rodesousa/lantern/logger"
 	"github.com/rodesousa/lantern/mapper"
 	"github.com/rodesousa/lantern/shard"
 	"github.com/spf13/cobra"
+	"net/http"
 	"os"
 	"strconv"
 )
@@ -28,6 +30,7 @@ import (
 //Controller
 type Controller struct {
 	filename string
+	result   string
 }
 
 var controller Controller
@@ -51,16 +54,19 @@ func runLuz(cmd *cobra.Command, args []string) {
 	} else {
 		log.Info("Starting lantern with run command")
 		log.DebugWithFields("run called", log.Fields{"args": args})
-		controller = Controller{args[0]}
-		// Launch lantern in selected mode
-		launchLantern()
 
+		// response json
+		mapB, _ := json.Marshal(map[string]string{"status": "OK"})
+		controller = Controller{args[0], string(mapB)}
+
+		// Launch lantern in selected mode
+		controller.launchLantern()
 	}
 	log.Info("End lantern")
 }
 
 // Main method of the lantern program
-func launchLantern() {
+func (controller Controller) launchLantern() {
 	// Init the mapper
 	shardsAsYaml, err := mapper.MappingYaml(controller.filename)
 	if err == nil {
@@ -77,17 +83,37 @@ func launchLantern() {
 		log.InfoWithFields("Test OK", log.Fields{"nbOk": sOk})
 		log.InfoWithFields("Test KO", log.Fields{"nbKO": sKo})
 
+		// lantern find check ko
 		if ko > 0 {
+			mapResult := map[string]string{}
+			mapResult["status"] = "KO"
 			for i := range koShards {
 				shard := koShards[i]
 				err := fmt.Sprintf("%s : %s", shard.Name, shard.Status.Err)
 				log.Info(err)
+				mapResult[shard.Name] = shard.Status.Err
+				mapB, _ := json.Marshal(mapResult)
+				controller.result = string(mapB)
 			}
+		}
+
+		// start lantern server
+		if server {
+			controller.runServer()
 		}
 	} else {
 		//error in mapping yaml
 		//TODO
 	}
+}
+
+func (controller Controller) handler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, controller.result)
+}
+
+func (controller Controller) runServer() {
+	http.HandleFunc("/", controller.handler)
+	http.ListenAndServe(":8080", nil)
 }
 
 func init() {
