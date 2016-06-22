@@ -22,10 +22,38 @@ import (
 	"github.com/rodesousa/lantern/mapper"
 	"github.com/rodesousa/lantern/shard"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"net/http"
 	"os"
 	"strconv"
 )
+
+// RootCmd represents the base command when called without any subcommands
+var RootCmd = &cobra.Command{
+	Use:   "lantern",
+	Short: "lantern is a tool for testing environments",
+	Long: `===============================================================================
+    __                         __                    __
+   / /   __  __ ____          / /   ____ _   ____   / /_  ___    _____   ____
+  / /   / / / //_  / ______  / /   / __  /  / __ \ / __/ / _ \  / ___/  / __ \
+ / /___/ /_/ /  / /_/_____/ / /___/ /_/ /  / / / // /_  /  __/ / /     / / / /
+/_____/\__,_/  /___/       /_____/\__,_/  /_/ /_/ \__/  \___/ /_/     /_/ /_/
+
+===============================================================================
+
+luz-lantern is a tool program used to test/check environments from development to production.
+
+Please check down for help.
+
+Copyright © 2016
+Roberto De Sousa (https://github.com/rodesousa)
+Patrick Tavares (https://github.com/ptavares)
+`,
+	// Uncomment the following line if your bare application
+	// has an action associated with it:
+	// Run: func(cmd *cobra.Command, args []string) { },
+
+}
 
 //Controller
 type Controller struct {
@@ -33,15 +61,79 @@ type Controller struct {
 	result   string
 }
 
-var controller Controller
+var (
+	cfgFile    string
+	logFile    string
+	debug      bool
+	off        bool
+	controller Controller
+)
 
-// runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:     "run [yaml_file]",
 	Short:   "launch the lantern program",
 	Long:    `launch the lanter program with a yaml file that discribe all test to do`,
 	Example: "lantern run tests.yaml",
 	Run:     runLuz,
+}
+
+var serverCmd = &cobra.Command{
+	Use:     "server [yaml_file]",
+	Short:   "launch the lantern program like a server",
+	Long:    `launch the lanter program with a yaml file that discribe all test to do`,
+	Example: "lantern server tests.yaml",
+	Run:     lanternServer,
+}
+
+func init() {
+	cobra.OnInitialize(initFromCL)
+	RootCmd.AddCommand(runCmd)
+	RootCmd.AddCommand(serverCmd)
+
+	RootCmd.PersistentFlags().StringVar(&logFile, "logfile", "", "log file output (default is current path)")
+	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "show debug message")
+	RootCmd.PersistentFlags().BoolVarP(&off, "off", "o", false, "disable out console log")
+}
+
+// initConfig reads in config file and ENV variables if set.
+func initFromCL() {
+
+	////mode server, disabled out console log
+	//if server {
+	//	off = true
+	//}
+
+	// initialize debug level
+	log.Init(debug, !off, (logFile != ""), logFile)
+
+	if cfgFile != "" {
+		// enable ability to specify config file via flag
+		viper.SetConfigFile(cfgFile)
+	}
+
+	viper.SetConfigName(".luz-lantern") // name of config file (without extension)
+	viper.AddConfigPath("$HOME")        // adding home directory as first search path
+	viper.AutomaticEnv()                // read in environment variables that match
+
+	// If a config file is found, read it in.
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	}
+}
+
+// Execute adds all child commands to the root command sets flags appropriately.
+// This is called by main.main(). It only needs to happen once to the rootCmd.
+func Execute() {
+	if err := RootCmd.Execute(); err != nil {
+		RootCmd.SetOutput(log.GetOutLogger())
+		RootCmd.Help()
+		os.Exit(-1)
+	}
+}
+
+func lanternServer(cmd *cobra.Command, args []string) {
+	runLuz(cmd, args)
+	controller.runServer()
 }
 
 // Main funtion, launch when run command is invoked
@@ -97,10 +189,6 @@ func (controller Controller) launchLantern() {
 			log.Info(err)
 		}
 
-		// start lantern server
-		if server {
-			controller.runServer()
-		}
 	} else {
 		//error in mapping yaml
 		//TODO
@@ -114,18 +202,4 @@ func (controller Controller) handler(w http.ResponseWriter, r *http.Request) {
 func (controller Controller) runServer() {
 	http.HandleFunc("/", controller.handler)
 	http.ListenAndServe(":8080", nil)
-}
-
-func init() {
-	RootCmd.AddCommand(runCmd)
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// runCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
 }
