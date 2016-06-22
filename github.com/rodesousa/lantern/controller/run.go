@@ -158,7 +158,7 @@ func runLuz(cmd *cobra.Command, args []string) {
 }
 
 // Main method of the lantern program
-func (controller Controller) launchLantern() {
+func (controller *Controller) launchLantern() {
 	// Init the mapper
 	shardsAsYaml, err := mapper.MappingYaml(controller.filename)
 	if err == nil {
