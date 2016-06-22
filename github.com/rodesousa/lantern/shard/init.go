@@ -95,5 +95,4 @@ func InitCurl(args ShardArguments) (error, Shard) {
 // UNKNOW
 func InitUnknow() (error, Shard) {
 	return errors.New("not implem"), Shard{}
-	//return Shard{"Unknow", []string{"???"}, make(ShardArguments), ResultDefault}
 }

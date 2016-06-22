@@ -51,8 +51,13 @@ func AnalyseShard(in []map[string]shard.ShardArguments) []shard.Shard {
 	for i := range in {
 		for k, v := range in[i] {
 			//TODO GERER LES CAS ERREUR
-			_, response := PatternMatching(k, v)
-			shards = append(shards, response)
+			error, response := PatternMatching(k, v)
+
+			if error != nil {
+				logger.ErrorWithFields("shard not recognized", logger.Fields{"shard": k})
+			} else {
+				shards = append(shards, response)
+			}
 		}
 	}
 	return shards
