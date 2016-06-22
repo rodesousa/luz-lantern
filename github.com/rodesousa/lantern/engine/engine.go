@@ -17,22 +17,14 @@ package engine
 
 import (
 	"github.com/rodesousa/lantern/shard"
-	"sync"
 	"runtime"
+	"sync"
 )
-
-func Run(shards []shard.Shard) []shard.Shard {
-	for i := range shards {
-		p := &shards[i]
-		p.Cmd()
-	}
-	return shards
-}
 
 func RunMultiThread(shards []shard.Shard) []shard.Shard {
 	// Number of available cores
 	numCore := runtime.NumCPU()
-	c := make(chan bool, numCore - 1)
+	c := make(chan bool, numCore-1)
 	wg := new(sync.WaitGroup)
 	// Number of goroutines
 	wg.Add(len(shards))
