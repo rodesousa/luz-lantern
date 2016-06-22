@@ -15,6 +15,7 @@
 package shard
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -29,10 +30,10 @@ func getExpected(shard *Shard) bool {
 }
 
 func (s *Shard) Cmd() bool {
-	out, status, error, err := s.exeCmd()
+	out, status, err := s.exeCmd()
 	if getExpected(s) != status {
-		if error != nil {
-			s.Status.Err = fmt.Sprintf("\n %s", err)
+		if err != "" {
+			s.Status.Err = err
 			s.Status.Check = false
 		}
 
@@ -46,15 +47,19 @@ func (s *Shard) Cmd() bool {
 	return s.Status.Check
 }
 
-func (s Shard) exeCmd() (string, bool, error, string) {
+func (s Shard) exeCmd() (string, bool, string) {
 	c := exec.Command(s.Command, s.CommandArguments...)
 
+	var stderr bytes.Buffer
+	c.Stderr = &stderr
+
 	err := c.Run()
+
 	stdout := fmt.Sprint(os.Stdout)
 
 	if err != nil {
-		return stdout, false, err, fmt.Sprint(os.Stderr)
+		return stdout, false, stderr.String()
 	} else {
-		return stdout, true, nil, ""
+		return stdout, true, ""
 	}
 }
