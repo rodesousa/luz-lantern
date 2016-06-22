@@ -81,20 +81,20 @@ func (controller Controller) launchLantern() {
 		sOk := strconv.Itoa(ok) + "/" + strconv.Itoa(len(shards))
 		sKo := strconv.Itoa(ko) + "/" + strconv.Itoa(len(shards))
 		log.InfoWithFields("Test OK", log.Fields{"nbOk": sOk})
-		log.InfoWithFields("Test KO", log.Fields{"nbKO": sKo})
 
 		// lantern find check ko
 		if ko > 0 {
+			err := fmt.Sprintf("Test KO nbKO=%s\n", sKo)
 			mapResult := map[string]string{}
 			mapResult["status"] = "KO"
 			for i := range koShards {
 				shard := koShards[i]
-				err := fmt.Sprintf("%s : %s", shard.Name, shard.Status.Err)
-				log.Info(err)
+				err = fmt.Sprintf("%s - %s : %s", err, shard.Name, shard.Status.Err)
 				mapResult[shard.Name] = shard.Status.Err
 				mapB, _ := json.Marshal(mapResult)
 				controller.result = string(mapB)
 			}
+			log.Info(err)
 		}
 
 		// start lantern server
