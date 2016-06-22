@@ -74,7 +74,7 @@ var runCmd = &cobra.Command{
 	Short:   "launch the lantern program",
 	Long:    `launch the lanter program with a yaml file that discribe all test to do`,
 	Example: "lantern run tests.yaml",
-	Run:     runLuz,
+	Run:     lantern,
 }
 
 var serverCmd = &cobra.Command{
@@ -97,14 +97,6 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initFromCL() {
-
-	////mode server, disabled out console log
-	//if server {
-	//	off = true
-	//}
-
-	// initialize debug level
-	log.Init(debug, !off, (logFile != ""), logFile)
 
 	if cfgFile != "" {
 		// enable ability to specify config file via flag
@@ -132,8 +124,14 @@ func Execute() {
 }
 
 func lanternServer(cmd *cobra.Command, args []string) {
+	log.Init(debug, false, (logFile != ""), logFile)
 	runLuz(cmd, args)
 	controller.runServer()
+}
+
+func lantern(cmd *cobra.Command, args []string) {
+	log.Init(debug, !off, (logFile != ""), logFile)
+	runLuz(cmd, args)
 }
 
 // Main funtion, launch when run command is invoked
