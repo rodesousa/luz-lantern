@@ -25,10 +25,10 @@ import (
 	"github.com/spf13/viper"
 	"net/http"
 	"os"
+	"os/exec"
 	"strconv"
 )
 
-// RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "lantern",
 	Short: "lantern is a tool for testing environments",
@@ -49,13 +49,14 @@ Copyright © 2016
 Roberto De Sousa (https://github.com/rodesousa)
 Patrick Tavares (https://github.com/ptavares)
 `,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
-
 }
 
-//Controller
+// // //
+//
+// Init Arg
+//
+// // //
+
 type Controller struct {
 	filename string
 	result   string
@@ -70,51 +71,72 @@ var (
 )
 
 var runCmd = &cobra.Command{
-	Use:     "run [yaml_file]",
+	Use:     "run",
 	Short:   "launch the lantern program",
 	Long:    `launch the lanter program with a yaml file that discribe all test to do`,
-	Example: "lantern run tests.yaml",
+	Example: "lantern run",
 	Run:     lantern,
 }
 
 var serverCmd = &cobra.Command{
-	Use:     "server [yaml_file]",
+	Use:   "server",
+	Short: "launch the lantern program like a server",
+	Long:  `launch the lanter program with a yaml file that discribe all test to do`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("Miss a argument, lantern server status | start | stop")
+	},
+}
+
+var startCmd = &cobra.Command{
+	Use:   "start",
+	Short: "launch the lantern program like a server",
+	Long:  `launch the lanter program with a yaml file that discribe all test to do`,
+	Run:   serverStart,
+}
+
+var statusCmd = &cobra.Command{
+	Use:     "status",
 	Short:   "launch the lantern program like a server",
 	Long:    `launch the lanter program with a yaml file that discribe all test to do`,
 	Example: "lantern server tests.yaml",
-	Run:     lanternServer,
+	Run:     serverStatus,
+}
+
+var stopCmd = &cobra.Command{
+	Use:     "stop",
+	Short:   "launch the lantern program like a server",
+	Long:    `launch the lanter program with a yaml file that discribe all test to do`,
+	Example: "lantern server tests.yaml",
+	Run:     serverStop,
 }
 
 func init() {
 	cobra.OnInitialize(initFromCL)
 	RootCmd.AddCommand(runCmd)
 	RootCmd.AddCommand(serverCmd)
+	serverCmd.AddCommand(stopCmd)
+	serverCmd.AddCommand(statusCmd)
+	serverCmd.AddCommand(startCmd)
 
 	RootCmd.PersistentFlags().StringVar(&logFile, "logfile", "", "log file output (default is current path)")
 	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "show debug message")
 	RootCmd.PersistentFlags().BoolVarP(&off, "off", "o", false, "disable out console log")
+	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "conf.yaml", "conf file")
 }
 
-// initConfig reads in config file and ENV variables if set.
 func initFromCL() {
-
 	if cfgFile != "" {
-		// enable ability to specify config file via flag
 		viper.SetConfigFile(cfgFile)
 	}
+	viper.SetConfigName(".luz-lantern")
+	viper.AddConfigPath("$HOME")
+	viper.AutomaticEnv()
 
-	viper.SetConfigName(".luz-lantern") // name of config file (without extension)
-	viper.AddConfigPath("$HOME")        // adding home directory as first search path
-	viper.AutomaticEnv()                // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
+	if debug {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 }
 
-// Execute adds all child commands to the root command sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
 		RootCmd.SetOutput(log.GetOutLogger())
@@ -123,10 +145,35 @@ func Execute() {
 	}
 }
 
-func lanternServer(cmd *cobra.Command, args []string) {
+// // //
+//
+// Main Program
+//
+// // //
+
+func serverStart(cmd *cobra.Command, args []string) {
 	log.Init(debug, false, (logFile != ""), logFile)
 	runLuz(cmd, args)
 	controller.runServer()
+}
+
+func serverStatus(cmd *cobra.Command, args []string) {
+	log.Init(debug, true, (logFile != ""), logFile)
+	if serverIsAlive() {
+		log.Info("Lantern is up")
+	} else {
+		log.Info("Lantern is down")
+	}
+}
+
+func serverStop(cmd *cobra.Command, args []string) {
+	log.Init(debug, true, (logFile != ""), logFile)
+	if serverIsAlive() {
+		log.Info("Lantern will be down")
+		stopServer()
+	} else {
+		log.Info("Lantern is down")
+	}
 }
 
 func lantern(cmd *cobra.Command, args []string) {
@@ -134,28 +181,19 @@ func lantern(cmd *cobra.Command, args []string) {
 	runLuz(cmd, args)
 }
 
-// Main funtion, launch when run command is invoked
 func runLuz(cmd *cobra.Command, args []string) {
-	// waiting for 1 arg -> show help in this case
-	if len(args) == 0 {
-		cmd.SetOutput(log.GetOutLogger())
-		cmd.Help()
-		os.Exit(1)
-	} else {
-		log.Info("Starting lantern with run command")
-		log.DebugWithFields("run called", log.Fields{"args": args})
+	log.Info("Starting lantern with run command")
+	log.DebugWithFields("run called", log.Fields{"args": args})
 
-		// response json
-		mapB, _ := json.Marshal(map[string]string{"status": "OK"})
-		controller = Controller{args[0], string(mapB)}
+	// response json
+	mapB, _ := json.Marshal(map[string]string{"status": "OK"})
+	controller = Controller{cfgFile, string(mapB)}
 
-		// Launch lantern in selected mode
-		controller.launchLantern()
-	}
+	// Launch lantern in selected mode
+	controller.launchLantern()
 	log.Info("End lantern")
 }
 
-// Main method of the lantern program
 func (controller *Controller) launchLantern() {
 	// Init the mapper
 	shardsAsYaml, err := mapper.MappingYaml(controller.filename)
@@ -193,11 +231,36 @@ func (controller *Controller) launchLantern() {
 	}
 }
 
+// // //
+//
+// Mode Server
+//
+// // //
+
+func (controller Controller) exitHandler(w http.ResponseWriter, r *http.Request) {
+	os.Exit(0)
+}
+
 func (controller Controller) handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, controller.result)
 }
 
 func (controller Controller) runServer() {
 	http.HandleFunc("/", controller.handler)
+	http.HandleFunc("/exit", controller.exitHandler)
 	http.ListenAndServe(":8080", nil)
+}
+
+func serverIsAlive() bool {
+	err := exec.Command("curl", "--silent", "localhost:8080").Run()
+
+	if err != nil {
+		return false
+	} else {
+		return true
+	}
+}
+
+func stopServer() {
+	exec.Command("curl", "--silent", "localhost:8080/exit").Run()
 }
