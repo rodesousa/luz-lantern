@@ -1,9 +1,7 @@
 [![Stories in Ready](https://badge.waffle.io/rodesousa/luz-lantern.png?label=ready&title=Ready)](https://waffle.io/rodesousa/luz-lantern)
 # luz-lantern
 
-## Conf
-
-### Install
+## Install
 
 Download source :
 ```bash
@@ -28,23 +26,60 @@ Build the program :
 cd $GOPATH/src/github.com/rodesousa/lantern
 go install .
 ```
-## Run
+## Conf
 
+Example
 ```
-lantern run `yaml__file`
+cmd:
+    - user:
+        name: aze
+
+    - user:
+        name: lala
+
+    - user:
+        name : ippon
+
+    - user:
+        name : root
+
+    - ping :
+        url : "google.com"
+
+    - ping :
+        url : "localhost"
+        expected : false
+
+    - curl:
+        url: "http://www.google.fr"
+        name: "google"
+```
+
+## Commande Line
+
+Run
+```
+lantern run 
+lantern run -c conf.yaml
 ```
 
 Mode server (port 8080)
 ```
-lantern run `yaml__file` -s &
+lantern server start &
+lantern server start -c conf.yaml &
+lantern server stop | status
 ```
 
-Debug
+Flags
 ```
-lantern run `yaml__file` -d
+-c, --config string    conf file (default "conf.yaml")
+-d, --debug            show debug message
+-h, --help             help for lantern
+    --logfile string   log file output (default is current path)
+-o, --off              disable out console log
 ```
 
-### luz with vim
+## luz with vim
 
 - Check install https://github.com/rodesousa/vim_conf.git
 - In vim, :GoInstallBinaries
