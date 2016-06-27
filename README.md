@@ -26,33 +26,13 @@ Build the program :
 cd $GOPATH/src/github.com/rodesousa/lantern
 go install .
 ```
-## Conf
+## Conf (conf.yaml)
 
 Example
 ```
 cmd:
     - user:
-        name: aze
-
-    - user:
-        name: lala
-
-    - user:
-        name : ippon
-
-    - user:
-        name : root
-
-    - ping :
-        url : "google.com"
-
-    - ping :
-        url : "localhost"
-        expected : false
-
-    - curl:
-        url: "http://www.google.fr"
-        name: "google"
+        name: root
 ```
 
 ## Commande Line
@@ -60,7 +40,6 @@ cmd:
 Run
 ```
 lantern run 
-lantern run -c conf.yaml
 ```
 
 Mode server (port 8080)
