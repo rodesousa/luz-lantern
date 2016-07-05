@@ -59,7 +59,9 @@ Patrick Tavares (https://github.com/ptavares)
 
 type Controller struct {
 	filename string
-	result   string
+	result   *string
+	cmd      *cobra.Command
+	args     []string
 }
 
 var (
@@ -67,7 +69,7 @@ var (
 	logFile    string
 	debug      bool
 	off        bool
-	controller Controller
+	controller *Controller
 )
 
 var runCmd = &cobra.Command{
@@ -122,6 +124,10 @@ func init() {
 	RootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "show debug message")
 	RootCmd.PersistentFlags().BoolVarP(&off, "off", "o", false, "disable out console log")
 	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "conf.yaml", "conf file")
+
+	//init controller
+	//controller = Controller{"", "", nil, nil}
+	controller = &Controller{}
 }
 
 func initFromCL() {
@@ -185,9 +191,10 @@ func runLuz(cmd *cobra.Command, args []string) {
 	log.Info("Starting lantern with run command")
 	log.DebugWithFields("run called", log.Fields{"args": args})
 
-	// response json
-	mapB, _ := json.Marshal(map[string]string{"status": "OK"})
-	controller = Controller{cfgFile, string(mapB)}
+	// controller
+	controller.cmd = cmd
+	controller.args = args
+	controller.filename = cfgFile
 
 	// Launch lantern in selected mode
 	controller.launchLantern()
@@ -220,9 +227,14 @@ func (controller *Controller) launchLantern() {
 				err = fmt.Sprintf("%s - %s : %s", err, shard.Name, shard.Status.Err)
 				mapResult[shard.Name] = shard.Status.Err
 				mapB, _ := json.Marshal(mapResult)
-				controller.result = string(mapB)
+				a := string(mapB)
+				controller.result = &a
 			}
 			log.Info(err)
+		} else {
+			mapB, _ := json.Marshal(map[string]string{"status": "OK"})
+			a := string(mapB)
+			controller.result = &a
 		}
 
 	} else {
@@ -241,13 +253,19 @@ func (controller Controller) exitHandler(w http.ResponseWriter, r *http.Request)
 	os.Exit(0)
 }
 
+func (controller Controller) handleaReCheck(w http.ResponseWriter, r *http.Request) {
+	controller.launchLantern()
+	fmt.Fprintf(w, *controller.result)
+}
+
 func (controller Controller) handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, controller.result)
+	fmt.Fprintf(w, *controller.result)
 }
 
 func (controller Controller) runServer() {
 	http.HandleFunc("/", controller.handler)
 	http.HandleFunc("/exit", controller.exitHandler)
+	http.HandleFunc("/check", controller.handleaReCheck)
 	http.ListenAndServe(":8080", nil)
 }
 
