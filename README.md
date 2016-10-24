@@ -1,33 +1,13 @@
 [![Stories in Ready](https://badge.waffle.io/rodesousa/luz-lantern.png?label=ready&title=Ready)](https://waffle.io/rodesousa/luz-lantern)
 # luz-lantern
 
-## Install
-
-Download source :
-```bash
-git clone https://github.com/rodesousa/luz-lantern.git
-```
-Configure $GOPATH env :
-```bash 
-cd luz-lantern
-ln -rs github.com $GOPATH/src/
-```
-Install dependencies :
+## Dependancies
 ```bash
 go get -v github.com/spf13/cobra/cobra
-```
-Download and add logrus to your $GOPATH
-```bash
-cd $GOPATH/src/github.com
 git clone https://github.com/Sirupsen/logrus.git
 ```
-Build the program :
-```bash
-cd $GOPATH/src/github.com/rodesousa/lantern
-go install .
-```
-## Conf
 
+## Conf
 Example
 ```
 cmd:
