@@ -16,7 +16,7 @@
 package engine
 
 import (
-	"github.com/rodesousa/lantern/shard"
+	"github.com/rodesousa/luz-lantern/shard"
 	"runtime"
 	"sync"
 )

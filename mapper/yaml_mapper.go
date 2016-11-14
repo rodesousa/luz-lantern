@@ -16,8 +16,8 @@
 package mapper
 
 import (
-	"github.com/rodesousa/lantern/logger"
-	"github.com/rodesousa/lantern/shard"
+	"github.com/rodesousa/luz-lantern/logger"
+	"github.com/rodesousa/luz-lantern/shard"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 )

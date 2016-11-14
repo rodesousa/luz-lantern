@@ -4,7 +4,7 @@
 ## Dependancies
 ```bash
 go get -v github.com/spf13/cobra/cobra
-git clone https://github.com/Sirupsen/logrus.git
+go get -v github.com/Sirupsen/logrus
 ```
 
 ## Conf

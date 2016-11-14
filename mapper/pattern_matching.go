@@ -15,7 +15,7 @@
 package mapper
 
 import (
-	"github.com/rodesousa/lantern/shard"
+	"github.com/rodesousa/luz-lantern/shard"
 )
 
 func PatternMatching(key string, value shard.ShardArguments) (error, shard.Shard) {
